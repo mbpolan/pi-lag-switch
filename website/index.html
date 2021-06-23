@@ -1,0 +1,78 @@
+<html>
+
+<head>
+    <title>Raspberry Pi Lag Switch</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        h1 {
+            font-size: 3rem;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .btn-xl {
+            padding: .5rem 1rem;
+            font-size: 4rem;
+            border-radius: .3rem;
+        }
+
+        .speed-info {
+            margin: 25px 0;
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<script>
+    $.getJSON('/api/lag')
+            .then(data => {
+                const { speed } = data;
+                updateSpeed(speed);
+            });
+
+    function updateSpeed(speed) {
+        const value = speed || 'unknown';
+        $('#speed').text(value.toUpperCase());
+    }
+
+    function setSpeed(speed) {
+        $.ajax({
+            method: 'POST',
+            url: '/api/lag',
+            data: JSON.stringify({
+                speed,
+            }),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: (data) => {
+                const { speed } = data;
+                updateSpeed(speed);
+            }
+        });
+    }
+</script>
+
+<body>
+    <div class="main">
+        <h1>Raspberry Pi Lag Switch</h1>
+        <div class="speed-info">
+            <h4>Current Speed:&nbsp;</h4>
+            <span id="speed">???</span>
+        </div>
+        <div class="btn-group-vertical">
+            <button type="button" class="btn btn-success btn-xl" onClick="setSpeed('unlimited')">UNLIMITED</button>
+            <button type="button" class="btn btn-secondary btn-xl" onClick="setSpeed('meh')">MEH</button>
+            <button type="button" class="btn btn-warning btn-xl" onClick="setSpeed('jittery')">JITTERY</button>
+            <button type="button" class="btn btn-danger btn-xl" onClick="setSpeed('saucy')">SAUCY</button>
+        </div>
+    </div>
+</body>
+
+</html>
