@@ -16,20 +16,20 @@ Static web assets are packed using the awesome [go.rice](https://github.com/Geer
 Install the package, and run the following command to generate a Go source file:
 
 ```bash
-rice embed-go
+$ rice embed-go
 ```
 
 Now build the project by running:
 
 ```bash
-go build
+$ go build
 ```
 
 Note: if you are building this on a macOS system, you can cross-compile for Linux ARM by using the following
 command instead:
 
 ```bash
-GOOS=linux GOARCH=arm go build
+$ GOOS=linux GOARCH=arm go build
 ```
 
 The build will produce a `lagswitch` binary, which you can run on your Raspberry PI (or equivalent Linux-based setup). 
@@ -40,8 +40,8 @@ Make sure your system already has the `tc` program available.
 
 Since the `tc` program requires root privileges to change traffic rules, we'll need to allow the user that
 runs the `lagswitch` process to do so as well. You _can_ use the default `pi` user gets created on most
-Raspbian distro installations, which has `sudo` abilities out of the box, or you can create a user just
-for this purpose.
+Raspbian distro installations, which has `sudo` abilities out of the box, or you can create a more restricted 
+user just for this purpose.
 
 ```bash
 $ sudo adduser lagswitch --system

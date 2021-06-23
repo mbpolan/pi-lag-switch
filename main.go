@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"flag"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os/exec"
@@ -20,6 +20,7 @@ var speedLimits map[string]string = map[string]string{
 }
 
 var limitSpeeds map[string]string
+var networkInterface string
 
 type ErrorModel struct {
 	Error string `json:"error"`
@@ -30,19 +31,19 @@ type LagModel struct {
 }
 
 func httpError(w http.ResponseWriter, message string, code int) {
-    w.Header().Set("Content-Type", "application/json")
-    w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
 
 	body := ErrorModel{
 		Error: message,
 	}
-    
-    json.NewEncoder(w).Encode(body)
+
+	json.NewEncoder(w).Encode(body)
 }
 
 func getSpeed() (string, error) {
-	args := []string{"class", "show", "dev", "wlan0"}
+	args := []string{"class", "show", "dev", networkInterface}
 
 	cmd := exec.Command("tc", args...)
 	output, err := cmd.CombinedOutput()
@@ -56,7 +57,7 @@ func getSpeed() (string, error) {
 }
 
 func applySpeed(speed string) error {
-	args := []string{"tc", "class", "replace", "dev", "wlan0", "root", "classid", "1:10", "htb", "rate", speed}
+	args := []string{"tc", "class", "replace", "dev", networkInterface, "root", "classid", "1:10", "htb", "rate", speed}
 
 	cmd := exec.Command("sudo", args...)
 	_, err := cmd.CombinedOutput()
@@ -126,7 +127,10 @@ func handleLag(w http.ResponseWriter, r *http.Request) {
 func main() {
 	hostPtr := flag.String("host", "", "the host to listen on")
 	portPtr := flag.Int("port", 8080, "the port to listen on")
+	interfacePtr := flag.String("interface", "wlan0", "the network interface to apply rules to")
 	flag.Parse()
+
+	networkInterface = *interfacePtr
 
 	limitSpeeds = make(map[string]string, len(speedLimits))
 	for k, v := range speedLimits {
